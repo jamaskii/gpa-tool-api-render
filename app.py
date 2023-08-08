@@ -14,27 +14,27 @@ app = Flask(__name__)
 def route_root():
     return render_template('index.html')
 
-@app.route('/api/vcimg')
-def route_api_vcimg():
-    body = {
-        'success': False,
-        'msg': '',
-        'data': {
-            'image': '',
-            'token': ''
-        }
-    }
-    try:
-        headers = { 'content-type': 'application/json' }
-        resp = requests.get('http://jw.gxmu.edu.cn/jsxsd/verifycode.servlet')
-        token = resp.cookies['JSESSIONID']
-        body['success'] = True
-        body['data']['image'] = base64.b64encode(resp.content).decode('utf-8')
-        body['data']['token'] = token
-    except Exception as e:
-        body['msg'] = str(e)
+# @app.route('/api/vcimg')
+# def route_api_vcimg():
+#     body = {
+#         'success': False,
+#         'msg': '',
+#         'data': {
+#             'image': '',
+#             'token': ''
+#         }
+#     }
+#     try:
+#         headers = { 'content-type': 'application/json' }
+#         resp = requests.get('http://jw.gxmu.edu.cn/jsxsd/verifycode.servlet')
+#         token = resp.cookies['JSESSIONID']
+#         body['success'] = True
+#         body['data']['image'] = base64.b64encode(resp.content).decode('utf-8')
+#         body['data']['token'] = token
+#     except Exception as e:
+#         body['msg'] = str(e)
     
-    return json.dumps(body, ensure_ascii=False, indent=4), headers
+#     return json.dumps(body, ensure_ascii=False, indent=4), headers
         
 @app.route('/vcimg')
 def route_vcimg():
@@ -44,7 +44,7 @@ def route_vcimg():
         cookie = 'JSESSIONID=%s;' %(token,)
         headers = {
             'content-type': 'image/jpeg',
-            'set-cookie': cookie
+            'set-cookie': cookie + 'Path=/;'
         }
         body = send_file(
             io.BytesIO(resp.content),
@@ -65,22 +65,22 @@ def route_api_login():
     username = request.args.get('username')
     password = request.args.get('password')
     vcode    = request.args.get('vcode')
-    token    = request.args.get('token')
+    # token    = request.args.get('token')
     cookie   = request.headers.get('cookie')
 
     if username == None or password == None or vcode == None:
         body['msg'] = '请提供完整参数'
         return json.dumps(body, ensure_ascii=False), 200, headers
-    if token == None and cookie == None:
-        body['msg'] = '请提供token或传递cookie'
-        return json.dumps(body, ensure_ascii=False), 200, headers
+    # if token == None and cookie == None:
+    #     body['msg'] = '请提供token或传递cookie'
+    #     return json.dumps(body, ensure_ascii=False), 200, headers
     
-    if token == None:
-        try:
-            token = re.findall(r'JSESSIONID=(.{32})', cookie)[1]
-        except:
-            pass
-    cookie = 'JSESSIONID=%s;' %(token,)
+    # if token == None:
+    #     try:
+    #         token = re.findall(r'JSESSIONID=(.{32})', cookie)[1]
+    #     except:
+    #         pass
+    # cookie = 'JSESSIONID=%s;' %(token,)
     
     data = {
         'encoded': base64.b64encode(username.encode('utf-8')).decode('utf-8') + '%%%' + base64.b64encode(password.encode('utf-8')).decode('utf-8'),
